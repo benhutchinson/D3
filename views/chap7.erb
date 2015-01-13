@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="/javascripts/d3.v3.js"></script>
+        <style>
+            body {
+                margin-top: 20px;
+                margin-left: 20px;
+                margin-right: 30%;
+                font-family: 'Avenir';
+                font-size: 18px; 
+                color: "#222";
+            }
+            div.bar {
+                display: inline-block;
+                width: 20px;
+                height: 75px;
+                background-color: teal;
+                margin-right: 2px; 
+            }
+        </style>
+    </head>
+    <body>
+
+    <p>Here, the first image represents circles that are created within an SVG object that is rendered.  The second image is a bar chart that is created as a set of styled divs and the third chart uses the same data-source, but renders the chart as an SVG object with labels and dynamically-generated tones.  The final chart is a scatterplot.</p>
+
+
+    <script type="text/javascript">
+
+    var dataset = [5, 10, 15, 20, 25];
+
+    var w = 500;
+    var h = 80; 
+
+    var svg = d3.select("body").append("svg")
+                    .attr("width", w)
+                    .attr("height", h)
+                    .attr("x", 10)
+                    .attr("y", 10);
+
+    var circles = svg.selectAll("circles")
+                    .data(dataset)
+                    .enter()
+                    .append("circle");
+
+    circles.attr("cx", function(d, i) {
+             return (i * 50) + 25;
+            })
+            .attr("cy", h/2)
+            .attr("r", function(d) {
+                return d;
+            })
+            .attr("fill", "yellow")
+            .attr("stroke", "orange")
+            .attr("stroke-width", function(d){
+                return d/2;
+            });
+
+
+    var second_dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+            11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
+
+    d3.select("body").selectAll("div")
+        .data(second_dataset)
+        .enter()
+        .append("div")
+        .attr("class", "bar")
+        .style("height", function(d) {
+            var barHeight = d *5;
+            return barHeight + "px";
+        });
+
+
+    var chartW = 500;
+    var chartH = 150;
+    var barPadding = 1; 
+
+    var chartSVG = d3.select("body")
+                .append("svg")
+                .attr("width", chartW)
+                .attr("height", chartH)
+                .attr("x", 10)
+                .attr("y", 250);
+
+    chartSVG.selectAll("rect")
+            .data(second_dataset)
+            .enter()
+            .append("rect")
+            .attr("x", function(d, i) { return i * (chartW / second_dataset.length); })
+            .attr("y", function(d) { return chartH - d*4; })
+            .attr("width", w / second_dataset.length - barPadding)
+            .attr("height", function(d) { return d*4 })
+            .attr("fill", function(d) {
+                return "rgb(0, 0, " +  (d * 10) + ")";
+            });
+
+    chartSVG.selectAll("text")
+            .data(second_dataset)
+            .enter()
+            .append("text")
+            .text(function(d) { return d; })
+            .attr("x", function(d, i) {
+                return i * (chartW / second_dataset.length) + (chartW / second_dataset.length - barPadding)/2;
+            })
+            .attr("y", function(d) {
+                return chartH - (d * 4) + 14;
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "11px")
+            .attr("fill", "white")
+            .attr("text-anchor", "middle");
+
+    var scatter_data = [
+                [5, 20],
+                [480, 90],
+                [250, 50],
+                [100, 33],
+                [330, 95],
+                [410, 12], 
+                [475, 44], 
+                [25, 67], 
+                [85, 21], 
+                [220, 88]
+              ];
+
+    var scatW = 500;
+    var scatH = 100;
+
+    var scatterSVG = d3.select("body")
+            .append("svg")
+            .attr("width", scatW)
+            .attr("height", scatH);
+
+    scatterSVG.selectAll("circle")
+                .data(scatter_data)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d) { return d[0]; })
+                .attr("cy", function(d) { return d[1]; })
+                .attr("r", function(d) { return Math.sqrt(scatH - d[1]); });
+
+    scatterSVG.selectAll("text")
+                .data(scatter_data)
+                .enter()
+                .append("text")
+                .text(function(d) {
+                    return d[0] + "," + d[1];
+                })
+                .attr("x", function(d) {
+                    return d[0];
+                })
+                .attr("y", function(d){
+                    return d[1];
+                })
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "11px")
+                .attr("fill", "red");
+    </script>
+    </body>
+</html>
