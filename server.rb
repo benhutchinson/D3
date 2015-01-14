@@ -32,5 +32,5 @@ get '/chap7' do
 end
 
 get '/chap8' do
-  erb : chap8
+  erb :chap8
 end
