@@ -30,3 +30,7 @@ end
 get '/chap7' do 
   erb :chap7
 end
+
+get '/chap8' do
+  erb : chap8
+end
