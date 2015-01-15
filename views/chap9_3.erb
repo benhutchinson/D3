@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="/javascripts/d3.v3.js"></script>
+        <style>
+            body {
+                margin-top: 20px;
+                margin-left: 20px;
+                margin-right: 30%;
+                font-family: 'Avenir';
+                font-size: 18px; 
+                color: "#222";
+            }
+
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
+
+/*            these are SVG properties that we are styling here hence fill rather than color, etc*/
+
+            .axis text {
+                font-family: sans-serif;
+                font-size: 11px;
+            }
+        </style>
+    </head>
+    <body>
+
+    <span>This section introduces methodologies for updating and adding new values to the dataset.  This is different to a blanket replacement of all values within a dataset of the same set length.</span>
+    <p>Click this text to add a new value to the dataset and see the chart dynamically update.  You can click any number of times.</p>
+
+    <script type="text/javascript">
+
+        var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+                11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
+
+        var w = 600;
+        var h = 250;
+
+        var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h);
+
+        var xScale = d3.scale.ordinal()
+                        .domain(d3.range(dataset.length))
+                        .rangeRoundBands([0,w], 0.05);
+
+        var yScale = d3.scale.linear()
+                        .domain([0, d3.max(dataset)])
+                        .range([0, h]);
+
+        svg.selectAll("rect")
+                    .data(dataset)
+                    .enter()
+                    .append("rect")
+                    .attr("x", function(d,i) { return xScale(i); })
+                    .attr("y", function(d) { return h - yScale(d); })
+                    .attr("width", xScale.rangeBand())
+                    .attr("height", function(d) { return yScale(d); })
+                    .attr("fill", function(d) { return "rgb(0,0," + (d * 10) + ")"})
+
+        svg.selectAll("text")
+           .data(dataset)
+           .enter()
+           .append("text")
+           .text(function(d) {
+                return d;
+           })
+           .attr("text-anchor", "middle")
+           .attr("x", function(d, i) {
+                return xScale(i) + xScale.rangeBand() / 2;
+           })
+           .attr("y", function(d) {
+                return h - yScale(d) + 14;
+           })
+           .attr("font-family", "sans-serif")
+           .attr("font-size", "11px")
+           .attr("fill", "white");
+
+        d3.select("p")
+            .on("click", function() {
+
+                var maxValue = 25;
+
+                var newNumber = Math.floor(Math.random() * maxValue);
+                dataset.push(newNumber);
+
+                xScale.domain(d3.range(dataset.length))
+
+                // this is called the 'update' selection.  i.e. these are
+                // the data and elements which we want to update.
+
+                var bars = svg.selectAll("rect")
+                            .data(dataset);
+
+                // here is how we create those bars that do not yet exist
+                // ie. the new datapoint
+                // the x attribute set at w puts it past the far right
+                // of the svg so that the bar is set out of sight and 
+                // can then be smoothly transitioned in.
+
+                bars.enter()
+                    .append("rect")
+                    .attr("x", w)
+                    .attr("y", function(d) {
+                        return h - yScale(d);
+                    })
+                    .attr("width", xScale.rangeBand())
+                    .attr("height", function(d) {
+                        return yScale(d);
+                    })
+                    .attr("fill", function(d) {
+                        return "rgb(0, 0, " + (d * 10) + ")";
+                    });
+
+                // generates the appropriate label
+
+                svg.selectAll("text")
+                   .data(dataset)
+                   .enter()
+                   .append("text")
+                   .text(function(d) {
+                        return d;
+                   })
+                   .attr("text-anchor", "middle")
+                   .attr("x", function(d, i) {
+                        return w + xScale.rangeBand() / 2;
+                   })
+                   .attr("y", function(d) {
+                        return h - yScale(d) + 14;
+                   })
+                   .attr("font-family", "sans-serif")
+                   .attr("font-size", "11px")
+                   .attr("fill", "white");
+
+                // generates the transitions for the bars and text 
+                // elements
+
+                bars.transition()
+                    .duration(500)
+                    .attr("x", function(d, i) {
+                        return xScale(i);
+                    })
+                    .attr("y", function(d) {
+                        return h - yScale(d);
+                    })
+                    .attr("width", xScale.rangeBand())
+                    .attr("height", function(d) {
+                        return yScale(d);
+                    });
+
+                svg.selectAll("text")
+                    .transition()
+                    .duration(500)
+                    .attr("x", function(d, i) {
+                        return xScale(i) + xScale.rangeBand() / 2;
+                    })
+                    .attr("y", function(d) {
+                        return h - yScale(d) + 14;
+                    });
+            });
+
+    </script>
+    </body>
+</html>
