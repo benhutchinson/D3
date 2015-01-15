@@ -32,8 +32,8 @@
     <body>
 
     <span>This section introduces methodologies for updating and adding new values to the dataset.  This is different to a blanket replacement of all values within a dataset of the same set length.</span>
-    <p>Click this text to add a new value to the dataset and see the chart dynamically update.  You can click any number of times.</p>
-
+    <p class="add_data">Click this text to add a new value to the dataset and see the chart dynamically update.  You can click any number of times.</p>
+    <p class="remove_data">Click this text to delete a value from the dataset and see the chart dynamically update.</p>
     <script type="text/javascript">
 
         var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
@@ -83,7 +83,7 @@
            .attr("font-size", "11px")
            .attr("fill", "white");
 
-        d3.select("p")
+        d3.select(".add_data")
             .on("click", function() {
 
                 var maxValue = 25;
@@ -165,6 +165,37 @@
                         return h - yScale(d) + 14;
                     });
             });
+
+        d3.select(".remove_data")
+            .on("click", function() {
+
+                // this removes the first element from the dataset
+                
+                dataset.shift();
+
+                var bars = svg.selectAll("rect")
+                            .data(dataset);
+                
+                // this transitions the exiting element to the right
+                // off the screen.
+                // remove removes the element from the DOM forever. 
+
+                bars.exit()
+                    .transition()
+                    .duration(500)
+                    .attr("x", w)
+                    .remove();
+
+                // this transitions the associated label off the screen
+
+                svg.selectAll("text")
+                    .data(dataset)
+                    .exit()
+                    .transition()
+                    .duration(500)
+                    .attr("x", w + xScale.rangeBand() / 2)
+                    .remove();
+        });
 
     </script>
     </body>
