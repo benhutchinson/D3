@@ -33,7 +33,7 @@
 
     <span>This section introduces methodologies for updating and adding new values to the dataset.  This is different to a blanket replacement of all values within a dataset of the same set length.</span>
     <p class="add_data">Click this text to add a new value to the dataset and see the chart dynamically update.  You can click any number of times.</p>
-    <p class="remove_data">Click this text to delete a value from the dataset and see the chart dynamically update.</p>
+    <p class="remove_data">Click this text to delete the first value from the dataset and see the chart dynamically update (and rescale).</p>
     <script type="text/javascript">
 
         var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
@@ -173,9 +173,32 @@
                 
                 dataset.shift();
 
+                // this recalibrates the x scale given there are fewer elements
+                // the y scale is also recalibrated given there could be a different
+                // max value
+
+                xScale.domain(d3.range(dataset.length));
+                yScale.domain([0, d3.max(dataset)]);
+
                 var bars = svg.selectAll("rect")
                             .data(dataset);
-                
+
+                // based on the new data set and scale, the position and width of the existing
+                // bars needs to be reset
+
+                bars.transition()
+                    .duration(500)
+                    .attr("x", function(d, i) {
+                            return xScale(i);
+                    })
+                    .attr("y", function(d) { 
+                        return h - yScale(d);
+                    })
+                    .attr("width", xScale.rangeBand())
+                    .attr("height", function(d) { 
+                        return yScale(d);
+                    });
+  
                 // this transitions the exiting element to the right
                 // off the screen.
                 // remove removes the element from the DOM forever. 
@@ -186,6 +209,22 @@
                     .attr("x", w)
                     .remove();
 
+                // reset the remaining labels
+
+                svg.selectAll("text")
+                    .data(dataset)
+                    .transition()
+                    .duration(500)
+                    .text(function(d) {
+                      return d;
+                    })
+                    .attr("x", function(d, i) {
+                        return xScale(i) + xScale.rangeBand() / 2;
+                    })
+                    .attr("y", function(d) {
+                        return h - yScale(d) + 14;
+                    });
+                   
                 // this transitions the associated label off the screen
 
                 svg.selectAll("text")
