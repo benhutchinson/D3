@@ -33,7 +33,7 @@
 
     <span>This section introduces methodologies for updating and adding new values to the dataset.  This is different to a blanket replacement of all values within a dataset of the same set length.</span>
     <p class="add_data">Click this text to add a new value to the dataset and see the chart dynamically update.  You can click any number of times.</p>
-    <p class="remove_data">Click this text to delete the first value from the dataset and see the chart dynamically update (and rescale).</p>
+    <p class="remove_data">Click this text to delete a value from the dataset and see the chart dynamically update.</p>
     <script type="text/javascript">
 
         var dataset =  [ { key: 0, value: 5 },
@@ -61,13 +61,6 @@
         // data joins, d will need to be referenced as d.value
         // in order to bind data as appropriate.
 
-        var key = function(d) {
-            return d.key;
-        };
-
-        // this function can be referenced in data binding to 
-        // influence how data-joins occur with elements
-
         var w = 600;
         var h = 250;
 
@@ -85,7 +78,7 @@
                         .range([0, h]);
 
         svg.selectAll("rect")
-                    .data(dataset, key)
+                    .data(dataset)
                     .enter()
                     .append("rect")
                     .attr("x", function(d,i) { return xScale(i); })
@@ -95,7 +88,7 @@
                     .attr("fill", function(d) { return "rgb(0,0," + (d.value * 10) + ")"})
 
         svg.selectAll("text")
-           .data(dataset, key)
+           .data(dataset)
            .enter()
            .append("text")
            .text(function(d) {
@@ -121,13 +114,14 @@
                 dataset.push(newNumber);
 
                 xScale.domain(d3.range(dataset.length));
+
                 yScale.domain([0, d3.max(dataset, function(d) { return d.value; })]);
 
                 // this is called the 'update' selection.  i.e. these are
                 // the data and elements which we want to update.
 
                 var bars = svg.selectAll("rect")
-                            .data(dataset, key);
+                            .data(dataset);
 
                 // here is how we create those bars that do not yet exist
                 // ie. the new datapoint
@@ -152,7 +146,7 @@
                 // generates the appropriate label
 
                 svg.selectAll("text")
-                   .data(dataset, key)
+                   .data(dataset)
                    .enter()
                    .append("text")
                    .text(function(d) {
@@ -203,32 +197,9 @@
                 
                 dataset.shift();
 
-                // this recalibrates the x scale given there are fewer elements
-                // the y scale is also recalibrated given there could be a different
-                // max value
-
-                xScale.domain(d3.range(dataset.length));
-                yScale.domain([0, d3.max(dataset, function(d) { return d.value; })]);
-
                 var bars = svg.selectAll("rect")
-                            .data(dataset, key);
-
-                // based on the new data set and scale, the position and width of the existing
-                // bars needs to be reset
-
-                bars.transition()
-                    .duration(500)
-                    .attr("x", function(d, i) {
-                            return xScale(i);
-                    })
-                    .attr("y", function(d) { 
-                        return h - yScale(d.value);
-                    })
-                    .attr("width", xScale.rangeBand())
-                    .attr("height", function(d) { 
-                        return yScale(d.value);
-                    });
-  
+                            .data(dataset);
+                
                 // this transitions the exiting element to the right
                 // off the screen.
                 // remove removes the element from the DOM forever. 
@@ -236,35 +207,17 @@
                 bars.exit()
                     .transition()
                     .duration(500)
-                    .attr("x", -xScale.rangeBand())
+                    .attr("x", w)
                     .remove();
 
-                // reset the remaining labels
-
-                svg.selectAll("text")
-                    .data(dataset, key)
-                    .transition()
-                    .duration(500)
-                    .text(function(d) {
-                      return d.value;
-                    })
-                    .attr("x", function(d, i) {
-                        return xScale(i) + xScale.rangeBand() / 2;
-                    })
-                    .attr("y", function(d) {
-                        return h - yScale(d.value) + 14;
-                    });
-                   
                 // this transitions the associated label off the screen
 
                 svg.selectAll("text")
-                    .data(dataset, key)
+                    .data(dataset)
                     .exit()
                     .transition()
                     .duration(500)
-                    .attr("x", function(d, i) {
-                        return -xScale(i) - xScale.rangeBand() / 2;
-                    })
+                    .attr("x", w + xScale.rangeBand() / 2)
                     .remove();
         });
 

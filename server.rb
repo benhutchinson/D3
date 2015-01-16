@@ -46,3 +46,7 @@ end
 get '/chap9_3' do 
   erb :chap9_3
 end
+
+get '/chap10' do
+  erb :chap10
+end
