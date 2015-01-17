@@ -18,12 +18,107 @@
     </head>
     <body>
 
-    <p>This section introduces the "stack layout."  </p>
+    <p>This section introduces the "stack layout."</p>
 
     <script type="text/javascript">
 
-        var dataset = [ 5, 10, 20, 45, 6, 25 ];
+        var w = 500;
+        var h = 300;
 
+        var dataset = [
+            [
+                { x: 0, y: 5 },
+                { x: 1, y: 4 },
+                { x: 2, y: 2 },
+                { x: 3, y: 7 },
+                { x: 4, y: 23 }
+            ],
+            [
+                { x: 0, y: 10 },
+                { x: 1, y: 12 },
+                { x: 2, y: 19 },
+                { x: 3, y: 23 },
+                { x: 4, y: 17 }
+            ],
+            [
+                { x: 0, y: 22 },
+                { x: 1, y: 28 },
+                { x: 2, y: 32 },
+                { x: 3, y: 35 },
+                { x: 4, y: 43 }
+            ]
+        ];
+
+        var stack = d3.layout.stack();
+        stack(dataset);
+
+        var xScale = d3.scale.ordinal()
+            .domain(d3.range(dataset[0].length))
+            .rangeRoundBands([0, w], 0.05);
+
+        // note the input domain
+        // each stack has the same number of elements
+        // i.e. here, we will have 5 bars
+        // within each bar, there are three categories
+        // they will stack so that each bar comprises of three elements
+        // hence the range just refers to the first array
+    
+        var yScale = d3.scale.linear()
+            .domain([0,             
+                d3.max(dataset, function(d) {
+                    return d3.max(d, function(d) {
+                        return d.y0 + d.y;
+                    });
+                })
+            ])
+            .range([0, h]);
+
+        // for the y scale, the output range is obvious
+        // for the input domain, d3.max appears chained
+        // d3.max normally works with arrays, but here we are working with an array of arrays
+        // hence the accessor function helps delve into those arrays before the maximum value is computed
+        // here, it effectively works by mapping over element object in the array of arrays
+        // i.e. loads each array individually and looks up the max element in that array
+        // to compute the maximum value, we reference the baseline value of all the elements and 
+        // the absolute value of those elements (since they sit on top of each other)
+        // then, with all those values, d3.max is called to compute the input domain for the scale.
+        // ref d3 docs
+        // https://github.com/mbostock/d3/wiki/Arrays#d3_max
+
+        var colors = d3.scale.category10();
+
+        var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h);
+
+        var groups = svg.selectAll("g")
+            .data(dataset)
+            .enter()
+            .append("g")
+            .style("fill", function(d, i) {
+                return colors(i);
+            });
+
+        // create a placeholder group for each row of data and then 
+        // within those groups, create a rectangle for each data value
+        // nb - for positioning, the baseline value is referenced for the y position
+        // and then a height is called from the d value.
+
+        var rects = groups.selectAll("rect")
+            .data(function(d) { return d; })
+            .enter()
+            .append("rect")
+            .attr("x", function(d, i) {
+                return xScale(i);
+            })
+            .attr("y", function(d) {
+                return yScale(d.y0);
+            })
+            .attr("height", function(d) {
+                return yScale(d.y);
+            })
+            .attr("width", xScale.rangeBand());
 
     </script>
     </body>
