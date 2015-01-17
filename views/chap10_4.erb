@@ -32,11 +32,22 @@
                 pointer-events: none;
             }
 
+            rect {
+                -moz-transition: all 0.3s;
+                -o-transition: all 0.3s;
+                -webkit-transition: all 0.3s;
+                transition: all 0.3s;
+            }
+
+            rect:hover {
+                fill: orange;
+            }
+
         </style>
     </head>
     <body>
 
-    <p>This section introduces interactivity, event listeners, and sorting.  Here, the orange colour mouseover effect is achieved through D3 and Javascript instead.  The text appended to the bars labelling the data ignores mouse-events.  This is important in ensuring that the bar changes colour, even when the mouse is technically hovering over the text element.  An alternative method would be to bind the event listeners to a grouping of elements.  Finally, the data can be resorted in ascending manner by clicking on the bars.</p>
+    <p>Tooltips</p>
 
     <script type="text/javascript">
 
@@ -79,25 +90,10 @@
             .attr("fill", function(d) {
                 return "rgb(0, 0, " + (d * 10) + ")";
             })
-            .on("mouseover", function() {
-                d3.select(this)
-                    .attr("fill", "orange");
-            })
-            .on("mouseout", function(d) {
-                d3.select(this)
-                    .transition()
-                    .duration(250)
-                    .attr("fill", "rgb(0, 0, " + (d * 10) + ")");
-            })
             .on("click", function(d) {
                 console.log(d);
-                sortBars();
-                sortText();
+                sortBarsAndText();
             });
-
-        // within the mouseover listener, 'this' helps us reference the 
-        // applicable element within the context of an anonymous function.
-        // mouseout helps revert back to a blue tone.
 
         // we are calling a sortBars() function on a click on the bars
         // but hypothetically it could be attached to a separate button or
@@ -123,31 +119,49 @@
             .attr("fill", "white");
 
         // these functions define the sort
+        // note the delay implemented in the transition at the element level
+        // i.e. each bar (data point) is effectively delayed by a different duration
+        // hence visually, you see each bar sort itself in an order
+
+        var sortOrder = false; 
         
-        var sortBars = function() {
+        var sortBarsAndText = function() {
+
+            sortOrder = !sortOrder; 
 
             svg.selectAll("rect")
-            .sort(function(a, b) {
-                return d3.ascending(a, b);
-            })
-            .transition()
-            .duration(1000)
-            .attr("x", function(d, i) {
-                return xScale(i);
-            });
-        };
-
-        var sortText = function() {
+                .sort(function(a, b) {
+                    if (sortOrder) {
+                        return d3.ascending(a, b);
+                    } else {
+                        return d3.descending(a, b);
+                    }
+                })
+                .transition()
+                .delay(function(d,i) {
+                    return i * 50;
+                })
+                .duration(1000)
+                .attr("x", function(d, i) {
+                    return xScale(i);
+                });
 
             svg.selectAll("text")
-            .sort(function(a, b) {
-                return d3.ascending(a, b);
-            })
-            .transition()
-            .duration(1000)
-            .attr("x", function(d, i) {
-                return xScale(i) + xScale.rangeBand() / 2;
-            });
+                .sort(function(a, b) {
+                    if (sortOrder) {
+                        return d3.ascending(a, b);
+                    } else {
+                        return d3.descending(a, b);
+                    }
+                })
+                .transition()
+                .delay(function(d,i) {
+                    return i * 50;
+                })
+                .duration(1000)
+                .attr("x", function(d, i) {
+                    return xScale(i) + xScale.rangeBand() / 2;
+                });
         };
 
     </script>

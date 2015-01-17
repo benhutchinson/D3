@@ -54,3 +54,11 @@ end
 get '/chap10_2' do
   erb :chap10_2
 end
+
+get '/chap10_3' do
+  erb :chap10_3
+end
+
+get '/chap10_4' do
+  erb :chap10_4
+end
