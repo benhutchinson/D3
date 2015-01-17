@@ -33,7 +33,7 @@
     </head>
     <body>
 
-    <p>This section introduces tooltips, hence the labels in previous charts have been removed.  The styling in this example is defined by the browser, but the text is outlined in the D3 script we have written.</p>
+    <p>This section offers a basic tooltip that is styled, created, and destroyed within the SVG element.</p>
 
     <script type="text/javascript">
 
@@ -50,12 +50,12 @@
         var yScale = d3.scale.linear()
                         .domain([0, d3.max(dataset)])
                         .range([0, h]);
-        
+
         var svg = d3.select("body")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h);
-                    
+
         svg.selectAll("rect")
             .data(dataset)
             .enter()
@@ -73,41 +73,32 @@
             .attr("fill", function(d) {
                 return "rgb(0, 0, " + (d * 10) + ")";
             })
-            .append("title")
-            .text(function(d) {
-                return "This value is " + d;
+            .on("mouseover", function(d) {
+                var xPosition = parseFloat(d3.select(this).attr("x")) + xScale.rangeBand()/2; 
+                var yPosition = parseFloat(d3.select(this).attr("y")) + 14; 
+
+                svg.append("text")
+                    .attr("id", "tooltip")
+                    .attr("x", xPosition)
+                    .attr("y", yPosition)
+                    .attr("text-anchor", "middle")
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", "11px")
+                    .attr("font-weight", "bold")
+                    .attr("fill", "black")
+                    .text(d);
             })
-            .on("click", function(d) {
-                console.log(d);
-                sortBars();
+            .on("mouseout", function() {
+                d3.select("#tooltip").remove();
             });
 
-        // the title element here is defining the tooltip.
 
-        var sortOrder = false; 
-        
-        var sortBars = function() {
+        // here the tooltip is created as an SVG element that we have manually
+        // styled.
+        // note the positioning, relative to each individual bar and how it uses
+        // parseFloat to pull a text string into a floating point value for computation.
+        // the element is given an id so that the tooltip can be deleted on mouseout.
 
-            sortOrder = !sortOrder; 
-
-            svg.selectAll("rect")
-                .sort(function(a, b) {
-                    if (sortOrder) {
-                        return d3.ascending(a, b);
-                    } else {
-                        return d3.descending(a, b);
-                    }
-                })
-                .transition()
-                .delay(function(d,i) {
-                    return i * 50;
-                })
-                .duration(1000)
-                .attr("x", function(d, i) {
-                    return xScale(i);
-                });
-
-        };
 
     </script>
     </body>
